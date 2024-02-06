@@ -15,6 +15,7 @@ export default function App() {
   const [tasks, setTasks] = useState<Task[]>([])
 
   // TO-DO: This request is running twice. How to fix that?
+  // This is happening due to React.StrictMode, it runs twice in debug but not in release
   useEffect(() => {
     fetch('http://localhost:1984/tasks')
       .then(res => {
