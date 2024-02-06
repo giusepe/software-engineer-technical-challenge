@@ -10,6 +10,8 @@ import Typography from '@mui/joy/Typography'
 import { Input } from '@mui/material'
 import { Task } from '@prisma/client'
 import { Fragment, useEffect, useState } from 'react'
+import { TaskSchema } from './TaskSchema'
+import { z } from 'zod'
 
 export default function App() {
   const [tasks, setTasks] = useState<Task[]>([])
@@ -22,7 +24,8 @@ export default function App() {
         return res.json()
       })
       .then(data => {
-        // TO-DO: How to guarantee that data is an array of Task?
+        const za = z.array(TaskSchema)
+        za.parse(data)
         setTasks(data)
       })
   }, [])
