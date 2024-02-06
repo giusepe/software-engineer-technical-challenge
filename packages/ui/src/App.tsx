@@ -7,6 +7,7 @@ import ListDivider from '@mui/joy/ListDivider'
 import ListItem from '@mui/joy/ListItem'
 import Stack from '@mui/joy/Stack'
 import Typography from '@mui/joy/Typography'
+import { Input } from '@mui/material'
 import { Task } from '@prisma/client'
 import { Fragment, useEffect, useState } from 'react'
 
@@ -30,6 +31,20 @@ export default function App() {
     completedStatus: Task['completed']
   ) => {
     // TO-DO: Persist the changes to the backend.
+    const completedTask = {
+      id: changedTask.id,
+      title: changedTask.title,
+      completed: completedStatus,
+    }
+    fetch(`http://localhost:1984/tasks/${changedTask.id}`, {
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+      },
+      method: 'put',
+      body: JSON.stringify(completedTask),
+    })
+
     setTasks(
       tasks.map(task =>
         task.id === changedTask.id
@@ -62,7 +77,22 @@ export default function App() {
             <ListItem
               key={task.id}
               endAction={
-                <IconButton aria-label='Delete' size='sm' color='danger'>
+                <IconButton
+                  aria-label='Delete'
+                  size='sm'
+                  color='danger'
+                  onClick={() => {
+                    fetch(`http://localhost:1984/tasks/${task.id}`, {
+                      headers: {
+                        Accept: 'application/json',
+                        'Content-Type': 'application/json',
+                      },
+                      method: 'delete',
+                    }).then(() => {
+                      // TO-DO: How to guarantee that data is an array of Task?
+                      setTasks(tasks.filter(t => t.id !== task.id) as Task[])
+                    })
+                  }}>
                   {/* TO-DO: Implement the delete feature */}
                   <Delete />
                 </IconButton>
@@ -81,7 +111,30 @@ export default function App() {
           </Fragment>
         ))}
       </List>
-      <Button fullWidth>
+      <Button
+        fullWidth
+        onClick={() => {
+          const taskTitle = prompt()
+          if (taskTitle) {
+            const newTask = { title: taskTitle, completed: false }
+
+            fetch(`http://localhost:1984/tasks`, {
+              headers: {
+                Accept: 'application/json',
+                'Content-Type': 'application/json',
+              },
+              method: 'post',
+              body: JSON.stringify(newTask),
+            })
+              .then(res => {
+                return res.json()
+              })
+              .then(data => {
+                // TO-DO: How to guarantee that data is an array of Task?
+                setTasks([...tasks, data as Task])
+              })
+          }
+        }}>
         {/* TO-DO: Implement the new task feature */}
         New Task
       </Button>

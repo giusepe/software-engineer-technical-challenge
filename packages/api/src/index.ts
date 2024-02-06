@@ -2,6 +2,7 @@
 
 import { Request, ResponseToolkit, Server } from '@hapi/hapi'
 import { PrismaClient } from '@prisma/client'
+import { Task } from '@prisma/client'
 
 const prisma = new PrismaClient()
 
@@ -44,8 +45,12 @@ const init = async () => {
     method: ['POST'],
     path: '/tasks',
     handler: async (request: Request, h: ResponseToolkit) => {
-      // TO-DO: Implement the create route
-      throw new Error('Not implemented')
+      console.log(request.payload)
+      return await prisma.task.create({
+        data: request.payload as Task,
+      })
+      // TO-DO: missing type checks and validations
+      // TO-DO: ignore the id field from the request or throw an error if it's present
     },
   })
 
@@ -54,8 +59,11 @@ const init = async () => {
     method: ['PUT', 'PATCH'],
     path: '/tasks/{id}',
     handler: async (request: Request, h: ResponseToolkit) => {
-      // TO-DO: Implement the update route
-      throw new Error('Not implemented')
+      return prisma.task.update({
+        where: { id: Number(request.params.id) },
+        data: request.payload as Task,
+      })
+      // TO-DO: check for invalid ids
     },
   })
 
